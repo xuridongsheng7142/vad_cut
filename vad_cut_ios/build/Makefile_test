@@ -1,0 +1,52 @@
+# version : 1.0.0
+ifndef VER_MAJOR
+VER_MAJOR = 1
+endif
+ifndef VER_MINOR
+VER_MINOR = 0
+endif
+ifndef VER_REV
+VER_REV   = 0
+endif
+
+VERSION = $(VER_MAJOR).$(VER_MINOR).$(VER_REV)
+
+INTERFACES_PATH = ..
+
+ifndef TARGET
+TARGET = WavSplit
+endif
+
+INCLUDEDIR	= -I$(INTERFACES_PATH)/webrtc/ \
+		-I$(INTERFACES_PATH)/ \
+		-I$(INTERFACES_PATH)/wav/ 
+
+LFLAGS   	= -w
+CFLAGS		= -fPIC -w -c -g -Wall
+
+LIBPATH   = $(INTERFACES_PATH)/lib
+
+LIB       = -lcommon_audio-$(PLATFORM) -laudio_processing-$(PLATFORM) -lsystem_wrappers-$(PLATFORM) -lwav-$(PLATFORM) 
+
+
+SRC_CORE	= $(wildcard $(INTERFACES_PATH)/AudioTest/*.cpp ) 
+
+OBJ_CORE	= $(patsubst %.cpp,%.o,$(SRC_CORE))
+LOBJ_CORE	= $(patsubst %.cpp,%.lo,$(SRC_CORE))
+
+all: $(TARGET)
+
+$(TARGET): \
+		$(OBJ_CORE)
+
+#
+	$(CXX) $(LFLAGS) $(OBJ_CORE) -o $(TARGET) -L$(LIBPATH) $(LIB)  
+$(OBJ_CORE):$(SRC_CORE)
+	$(CXX) $(CFLAGS) $*.cpp -g -o $@ $(INCLUDEDIR)
+
+dist:
+
+clean:
+	rm -f $(OBJ_CORE)
+	rm -f $(LOBJ_CORE)
+	rm -f $(TARGET).*

@@ -1,0 +1,53 @@
+# version : 1.0.0
+ifndef VER_MAJOR
+VER_MAJOR = 1
+endif
+ifndef VER_MINOR
+VER_MINOR = 0
+endif
+ifndef VER_REV
+VER_REV   = 0
+endif
+
+VERSION = $(VER_MAJOR).$(VER_MINOR).$(VER_REV)
+INTERFACES_PATH = ../
+
+ifndef LIB_NAME
+LIB_NAME = libwav-$(PLATFORM)
+endif
+
+SO_NAME	 = $(LIB_NAME).so.$(VER_MAJOR)
+TARGET   = $(LIB_NAME).so.$(VER_MAJOR).$(VER_MINOR).$(VER_REV)
+
+INCLUDEDIR	= -I$(INTERFACES_PATH)wav/
+
+LFLAGS   	= -shared 
+CFLAGS		= -fPIC -c -g
+
+LIBPATH   =  
+LIB       =  
+
+CXXSRC_CORE       = $(wildcard $(INTERFACES_PATH)wav/*.cpp)
+
+OBJ_CORE        = $(patsubst %.cpp,%.o,$(CXXSRC_CORE))
+
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ_CORE)
+	$(CXX) $^ $(LIBPATH) $(LIB) $(LFLAGS) -o $@
+ 
+%.o:%.c
+	$(CC) -o $@ $(CFLAGS) $< $(INCLUDEDIR)
+ 
+%.o:%.cpp
+	$(CXX) -o $@ $(CFLAGS) -std=c++11 $< $(INCLUDEDIR)
+
+dist:
+	mkdir -p $(TARGET_PATH)
+	cp -rf $(TARGET) $(TARGET_PATH)
+
+clean:
+	rm -f $(OBJ_CORE)
+	rm -f $(LOBJ_CORE)
+	rm -f $(LIB_NAME)*

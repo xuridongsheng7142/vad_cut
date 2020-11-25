@@ -1,0 +1,71 @@
+# version : 1.0.0
+ifndef VER_MAJOR
+VER_MAJOR = 1
+endif
+ifndef VER_MINOR
+VER_MINOR = 0
+endif
+ifndef VER_REV
+VER_REV   = 0
+endif
+
+VERSION = $(VER_MAJOR).$(VER_MINOR).$(VER_REV)
+INTERFACES_PATH = ../#
+
+ifndef LIB_NAME
+LIB_NAME = libcommon_audio-$(PLATFORM)
+endif
+
+SO_NAME	 = $(LIB_NAME).so.$(VER_MAJOR)
+TARGET   = $(LIB_NAME).so.$(VER_MAJOR).$(VER_MINOR).$(VER_REV)
+
+INCLUDEDIR	= -I$(INTERFACES_PATH)webrtc/ \
+		-I$(INTERFACES_PATH)
+#                -I$(INTERFACES_PATH)webrtc/common_audio/resampler/ \
+                -I$(INTERFACES_PATH)webrtc/common_audio/resampler/include \
+                -I$(INTERFACES_PATH)webrtc/common_audio/signal_processing/ \
+                -I$(INTERFACES_PATH)webrtc/common_audio/signal_processing/include \
+                -I$(INTERFACES_PATH)webrtc/common_audio/vad/ \
+                -I$(INTERFACES_PATH)webrtc/common_audio/vad/include \
+		-I$(INTERFACES_PATH)webrtc/common_audio\include
+
+LFLAGS   	= -w -shared 
+CFLAGS		= -fPIC -w -c -g -Wall
+
+LIBPATH   =  
+LIB       =  
+
+CSRC_CORE	= $(wildcard $(INTERFACES_PATH)webrtc/*.c) \
+		$(wildcard $(INTERFACES_PATH)webrtc/common_audio/*.c) \
+                $(wildcard $(INTERFACES_PATH)webrtc/common_audio/resampler/*.c) \
+                $(wildcard $(INTERFACES_PATH)webrtc/common_audio/signal_processing/*.c) \
+                $(wildcard $(INTERFACES_PATH)webrtc/common_audio/vad/*.c) \
+
+CXXSRC_CORE       = $(wildcard $(INTERFACES_PATH)webrtc/common_audio/*.cc) \
+                $(wildcard $(INTERFACES_PATH)webrtc/common_audio/resampler/*.cc) \
+                $(wildcard $(INTERFACES_PATH)webrtc/common_audio/signal_processing/*.cc) \
+                $(wildcard $(INTERFACES_PATH)webrtc/common_audio/vad/*.cc) 
+
+
+OBJ_CORE	= $(patsubst %.c,%.o,$(CSRC_CORE)) $(patsubst %.cc,%.o,$(CXXSRC_CORE))
+LOBJ_CORE	= $(patsubst %.c,%.lo,$(CSRC_CORE)) $(patsubst %.cc,%.lo,$(CXXSRC_CORE))
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ_CORE)
+	$(CXX) $^ $(LIBPATH) $(LIB) $(LFLAGS) -o $@
+ 
+%.o:%.c
+	$(CC) -o $@ $(CFLAGS) $< $(INCLUDEDIR)
+ 
+%.o:%.cc
+	$(CXX) -o $@ $(CFLAGS) -std=c++11 $< $(INCLUDEDIR)
+
+dist:
+	mkdir -p $(TARGET_PATH)
+	cp -rf $(TARGET) $(TARGET_PATH)
+
+clean:
+	rm -f $(OBJ_CORE)
+	rm -f $(LOBJ_CORE)
+	rm -f $(LIB_NAME)*
